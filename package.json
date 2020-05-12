@@ -1,0 +1,29 @@
+{
+  "name": "0511fintech",
+  "version": "1.0.0",
+  "description": "",
+  "main": "async.js",
+  "directories": {
+    "example": "example"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "express": "^4.17.1",
+    "request": "^2.88.2",
+    "xml2js": "^0.4.23"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jihyuno301/Fintech.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jihyuno301/Fintech/issues"
+  },
+  "homepage": "https://github.com/jihyuno301/Fintech#readme"
+}
