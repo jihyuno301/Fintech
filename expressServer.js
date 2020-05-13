@@ -1,7 +1,8 @@
 const express = require('express')
 const app = express()
 const path = require('path')
-var request = require('request')
+var request = require('request');
+var mysql = require('mysql');
 
 app.set('views', path.join(__dirname, 'views')); // ejs file location
 app.set('view engine', 'ejs'); //select view templet engine
@@ -11,6 +12,14 @@ app.use(express.static(path.join(__dirname, 'public')));//to use static asset
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 
+var connection = mysql.createConnection({
+    host     : 'localhost',
+    user     : 'root',
+    password : 'jh0322JH##',
+    database : 'fintech'
+});
+
+connection.connect();
 app.get('/', function (req, res) {
     var title = "javascript"
     res.send('<html><h1>'+title+'</h1><h2>contents</h2></html>')
@@ -72,10 +81,24 @@ app.get('/authResult', function(req, res) {
             console.error(err);
             throw err;
         } else {
-            console.log(body);
+            let accessRequestResult = JSON.parse(body);
+            console.log(accessRequestResult);
+            res.render('resultChild', {data : accessRequestResult} )
         }
     })
     // accesstoken get request
 })
+
+app.post('/signup', function(req, res){
+    //data req get db store
+    let userName = req.body.userName
+    let userEmail = req.body.userEmail
+    let userPassword = req.body.userPassword
+    let userAccessToken = req.body.userAccessToken
+    let userRefreshToken = req.body.userRefreshToken
+    let userSeqNo = req.body.userSeqNo
+    console.log(userName, userAccessToken, userSeqNo);
+})
+
 
 app.listen(3000)
