@@ -1,9 +1,11 @@
 const express = require('express')
 const app = express()
 const path = require('path')
+
 var request = require('request');
 var mysql = require('mysql');
 var jwt = require('jsonwebtoken');
+var auth = require('./lib/auth');
 
 app.set('views', path.join(__dirname, 'views')); // ejs file location
 app.set('view engine', 'ejs'); //select view templet engine
@@ -45,6 +47,10 @@ app.post('/getData', function (req, res) {
     console.log('userData = ', userData);
     res.json(userData + "!!!!!")
 })
+app.post('/authTest', auth, function(req, res) {
+    res.json('login user!!')
+})
+
 //------------------service start //
 app.get('/signup', function (req, res) {
     res.render('signup');
