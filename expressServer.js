@@ -48,7 +48,7 @@ app.post('/getData', function (req, res) {
     res.json(userData + "!!!!!")
 })
 app.post('/authTest', auth, function(req, res) {
-    res.json('login user!!')
+    res.json(req.decoded);
 })
 
 //------------------service start //
