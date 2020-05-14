@@ -3,7 +3,7 @@ const app = express()
 const path = require('path')
 var request = require('request');
 var mysql = require('mysql');
-
+var jwt = require('jsonwebtoken');
 
 app.set('views', path.join(__dirname, 'views')); // ejs file location
 app.set('view engine', 'ejs'); //select view templet engine
@@ -124,6 +124,23 @@ app.post('/login', function(req, res) {
                 var dbPassword = result[0].password; // 하나가 나온다는 가정 하에
                 if(dbPassword == userPassword) {
                     // login success
+                    var tokenKey = "f@i#n%tne#ckfhlafkd0102test!@#%"
+                    jwt.sign(
+                        {
+                            userId : result[0].id,
+                            userEmail : result[0].email
+                        },
+                        tokenKey,
+                        {
+                            expiresIn : '10d',
+                            issuer : 'fintech.admin',
+                            subject : 'user.login.info'
+                        },
+                        function(err, token){
+                            console.log('로그인 성공', token)
+                            res.json(token)
+                        }
+                    )
                 }
                 else {
                     res.json(2);
