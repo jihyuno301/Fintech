@@ -4,101 +4,133 @@ const path = require('path')
 var request = require('request');
 var mysql = require('mysql');
 
+
 app.set('views', path.join(__dirname, 'views')); // ejs file location
 app.set('view engine', 'ejs'); //select view templet engine
-
 app.use(express.static(path.join(__dirname, 'public')));//to use static asset
-
 app.use(express.json());
-app.use(express.urlencoded({extended:false}));
-
+app.use(express.urlencoded({extended: false}));
 var connection = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'root',
-    password : 'test123',
-    database : 'fintech'
+    host: 'localhost',
+    user: 'root',
+    password: 'test123',
+    database: 'fintech'
 });
-
 connection.connect();
+
 app.get('/', function (req, res) {
     var title = "javascript"
-    res.send('<html><h1>'+title+'</h1><h2>contents</h2></html>')
+    res.send('<html><h1>' + title + '</h1><h2>contents</h2></html>')
 })
-
-app.get('/ejs', function(req, res){
+app.get('/ejs', function (req, res) {
     res.render('test')
 })
-
-app.get('/test', function(req, res){
+app.get('/test', function (req, res) {
     res.send('Test')
 })
-
-app.get('/design', function(req, res){
+app.get('/design', function (req, res) {
     res.render('designTest');
 })
-
 //datasend Router add
-app.get('/dataSend', function(req, res){
+app.get('/dataSend', function (req, res) {
     res.render('dataSend');
 })
-
-app.post('/getTime', function(req, res){
+app.post('/getTime', function (req, res) {
     var nowTime = new Date();
     res.json(nowTime);
 })
-
-app.post('/getData', function(req, res){
+app.post('/getData', function (req, res) {
     console.log(req.body);
     var userData = req.body.userInputData;
     console.log('userData = ', userData);
     res.json(userData + "!!!!!")
 })
-
 //------------------service start //
-app.get('/signup', function(req, res){
+app.get('/signup', function (req, res) {
     res.render('signup');
 })
 
-app.get('/authResult', function(req, res) {
+app.get('/login', function(req, res){
+    res.render('login');
+})
+
+app.get('/authResult', function (req, res) {
     var authCode = req.query.code
     console.log(authCode);
     var option = {
-        method : "POST",
-        url : "https://testapi.openbanking.or.kr/oauth/2.0/token",
-        header : {
-            'Content-Type' : 'application/x-www-form-urlencoded'
+        method: "POST",
+        url: "https://testapi.openbanking.or.kr/oauth/2.0/token",
+        header: {
+            'Content-Type': 'application/x-www-form-urlencoded'
         },
-        form : {
-            code : authCode,
-            client_id : 'D2Tqsa7sSmcDSEbncC711RznB1a4xBB1a4OhANyt',
-            client_secret : 'grIUxNmeyZhdo8sxIy6p1bJ7g972h2xJjuW0DFt9',
-            redirect_uri : 'http://localhost:3000/authResult',
-            grant_type : 'authorization_code'
+        form: {
+            code: authCode,
+            client_id: 'D2Tqsa7sSmcDSEbncC711RznB1a4xBB1a4OhANyt',
+            client_secret: 'grIUxNmeyZhdo8sxIy6p1bJ7g972h2xJjuW0DFt9',
+            redirect_uri: 'http://localhost:3000/authResult',
+            grant_type: 'authorization_code'
         }
     }
-    request(option, function(err, response, body) {
-        if(err) {
+    request(option, function (err, response, body) {
+        if (err) {
             console.error(err);
             throw err;
         } else {
-            let accessRequestResult = JSON.parse(body);
+            var accessRequestResult = JSON.parse(body);
             console.log(accessRequestResult);
-            res.render('resultChild', {data : accessRequestResult} )
+            res.render('resultChild', {data: accessRequestResult})
         }
     })
-    // accesstoken get request
 })
-
-app.post('/signup', function(req, res){
+app.post('/signup', function (req, res) {
     //data req get db store
-    let userName = req.body.userName
-    let userEmail = req.body.userEmail
-    let userPassword = req.body.userPassword
-    let userAccessToken = req.body.userAccessToken
-    let userRefreshToken = req.body.userRefreshToken
-    let userSeqNo = req.body.userSeqNo
+    var userName = req.body.userName
+    var userEmail = req.body.userEmail
+    var userPassword = req.body.userPassword
+    var userAccessToken = req.body.userAccessToken
+    var userRefreshToken = req.body.userRefreshToken
+    var userSeqNo = req.body.userSeqNo
     console.log(userName, userAccessToken, userSeqNo);
+    var sql = "INSERT INTO fintech.user (name, email, password, accesstoken, refreshtoken, userseqno) VALUES (?,?,?,?,?,?)"
+    connection.query(
+        sql, // excute sql
+        [userName, userEmail, userPassword, userAccessToken, userRefreshToken, userSeqNo], // ? <- value
+        function (err, result) {
+            if (err) {
+                console.error(err);
+                res.json(0);
+                throw err;
+            } else {
+                res.json(1)
+            }
+        })
 })
 
+app.post('/login', function(req, res) {
+    var userEmail = req.body.userEmail;
+    var userPassword = req.body.userPassword;
+    var sql = "SELECT * FROM user WHERE email = ?";
+    connection.query(sql, [userEmail], function(err, result) {
+        if(err) {
+            console.error(err);
+            res.json(0);
+            throw err;
+        }
+        else {
+            if(result.length == 0) {
+                res.json(3)
+            }
+            else {
+                var dbPassword = result[0].password; // 하나가 나온다는 가정 하에
+                if(dbPassword == userPassword) {
+                    // login success
+                }
+                else {
+                    res.json(2);
+                }
+            }
+        }
+    })
+})
 
 app.listen(3000)
